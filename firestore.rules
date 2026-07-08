@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// Starter rules for a no-login demo/small-business tool: anyone with the
+// site URL can read and write kv_store documents (that's how the provider
+// and customer see each other's data with no auth system). It's scoped to
+// just this one collection, and each document is capped at 200KB so someone
+// can't dump huge junk into your project.
+//
+// This is NOT locked down for a public production deployment where you
+// don't trust every visitor. Before relying on this for real customer data,
+// consider adding Firebase Authentication (e.g. a simple provider login)
+// and rewriting these rules to check request.auth, or moving writes behind
+// a Cloud Function you control.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /kv_store/{key} {
+      allow read: if true;
+      allow write: if request.resource.data.value is string
+                   && request.resource.data.value.size() < 200000;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
